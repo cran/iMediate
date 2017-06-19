@@ -9,7 +9,7 @@ Mediation Analysis via Likelihood
 }
 
 \usage{
-mdn(fit.M, fit.Y, X, test="S test", sig.level=0.05)
+mdn(fit.M, fit.Y, X, test="LR", sig.level=0.05, B=100)
 }
 
 \arguments{
@@ -24,10 +24,13 @@ a fitted model object for outcome. It can be of a class different from the model
 a character string of the name of the treatment variable.
 }
 \item{test }{
-a character string specifying the test statistic used for the mediated effect. It can be either ``S test'' for the S test proposed in Berger (1996) or ``LRT'' for the LRT test discussed in Wang (2017). 
+a character string specifying the test statistic used for the mediated effect. It can be either ``\code{S}'' for the S test proposed in Berger (1996) or ``\code{LR}'' for the LR test discussed in Wang (2017). 
 }
 \item{sig.level }{
 a numerical variable specifying the significance level for the test of the mediated effect.
+}
+\item{B }{
+an integer specifying the number of replicates used for the bootstrapping
 }
 }
 
@@ -38,16 +41,25 @@ Necessary log-likelihoods are extracted from the two fitted models. Various effe
 
 \value{
 A list with class ``\code{mdn}'' containing the following components:
-\item{result}{a data frame containing the results of the mediation analysis. The are two variables. One is estimate of various effects and the other is the p-value
+\item{result}{a data frame containing the results of the mediation analysis. The are five variables. They include estimates of various effects and lower and upper bounds of the boostrap confidence interval at level (1-\code{sig.level}) followed by test statistics and their respective p-values. 
 }
 \item{test}{a character string specifying the test statistic used for the mediated effect
+}
+\item{sig.level }{
+a numerical variable specifying the significance level for the test of the mediated effect.
+}
+\item{Sample.size }{
+number of subjects in the data
+}
+\item{B }{
+an integer specifying the number of replicates used for the bootstrapping
 }
 }
 
 \references{
 Berger, R.L. (1997) Likelihood ratio tests and intersection-union tests. Advances in statistical decision theory and applications. Birkh\"{a}user Boston, 225-237.
 
-Wang, K. (2016) An approximate uniformly more powerful test of mediated effect. Submitted.
+Wang, K. (2017) An approximate uniformly more powerful test of mediated effect. Submitted.
 
 Wang, K. (2017) Mediation analysis via likelihood. Submitted.
 }
@@ -66,24 +78,11 @@ Kai Wang \code{<kai-wang@uiowa.edu>}
 %%}
 
 \examples{
-library(mediation)
+data("jobs", package = "mediation")
 
-b <- lm(job_seek ~ treat + econ_hard + sex + age, data=jobs)
-c <- lm(depress2 ~ treat + job_seek + econ_hard + sex + age, data=jobs)
-mdn(b, c, "treat")
-
-## example of obtaining bootstrap confidence interval
-B = 100
-boot = matrix(0, ncol=B, nrow=7)
-for (i in 1:B){
-    b.jobs = jobs[sample(1:nrow(jobs), replace=TRUE),]
-    b <- lm(job_seek ~ treat + econ_hard + sex + age, data=b.jobs)
-    c <- lm(depress2 ~ treat + job_seek + econ_hard + sex + age, data=b.jobs)
-    boot[,i] = mdn(b, c, "treat")$result[, "Estimate"]
-}
-
-apply(boot, 1, quantile, probs=c(0.025, 0.975))
-
+fit.M <- lm(job_seek ~ treat + econ_hard + sex + age, data=jobs)
+fit.Y <- lm(depress2 ~ treat + job_seek + econ_hard + sex + age, data=jobs)
+mdn(fit.M, fit.Y, "treat")
 
 }
 

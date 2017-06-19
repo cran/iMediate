@@ -6,7 +6,7 @@
 Methods for Statistical Mediation Analysis
 }
 \description{
-\code{iMediate} is a collection of methods developed by our group for mediation analysis. So far it contains methods built upon likelihoods. Novel methods for other topics such as sensitivity analysis, longitudinal data, will be added in the future. Use \code{?iMediate} to see an introduction.
+\code{iMediate} is a collection of methods developed by our group for mediation analysis. It contains methods built upon likelihoods. Use \code{?iMediate} to see an introduction.
 }
 \details{
 \tabular{ll}{
@@ -34,9 +34,9 @@ Wang, K. (2017) Mediation analysis via likelihood. Submitted.
 %%~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
 %}
 \examples{
-library(mediation)
+data("jobs", package = "mediation")
 
-b <- lm(job_seek ~ treat + econ_hard + sex + age, data=jobs)
-c <- lm(depress2 ~ treat + job_seek + econ_hard + sex + age, data=jobs)
-mdn(b, c, "treat")
+fit.M <- lm(job_seek ~ treat + econ_hard + sex + age, data=jobs)
+fit.Y <- lm(depress2 ~ treat + job_seek + econ_hard + sex + age, data=jobs)
+mdn(fit.M, fit.Y, "treat")
 }

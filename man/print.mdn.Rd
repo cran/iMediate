@@ -47,11 +47,11 @@ Kai Wang \code{<kai-wang@uiowa.edu>}
 %%}
 
 \examples{
-library(mediation)
+data("jobs", package = "mediation")
 
-b <- lm(job_seek ~ treat + econ_hard + sex + age, data=jobs)
-c <- lm(depress2 ~ treat + job_seek + econ_hard + sex + age, data=jobs)
-mdn(b, c, "treat")
+fit.M <- lm(job_seek ~ treat + econ_hard + sex + age, data=jobs)
+fit.Y <- lm(depress2 ~ treat + job_seek + econ_hard + sex + age, data=jobs)
+mdn(fit.M, fit.Y, "treat")
 }
 
 % Add one or more standard keywords, see file 'KEYWORDS' in the

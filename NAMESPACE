@@ -1,5 +1,5 @@
 exportPattern("^[[:alpha:]]+")
 S3method(print, mdn)
 import("mediation")
-importFrom("stats", "as.formula", "lm", "logLik", "pchisq", "qchisq",
+importFrom("stats", "as.formula", "lm", "logLik", "pchisq", "qchisq","resid",
              "quantile", "update", "formula", "coef", "pnorm")
