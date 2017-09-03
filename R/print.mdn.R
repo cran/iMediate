@@ -1,3 +1,26 @@
+#' Print Method for Class ``mdn''
+#' 
+#' \code{print.mdn} is the print utility for the output from function
+#' \code{mdn}
+#' 
+#' %% ~~ If necessary, more details than the description above ~~ 
+#' The p-value for the mediated effect is displayed as greater or smaller than
+#' \code{sig.level}. For instance, if it is not significant at level 0.05, then
+#' ``\code{> 0.05}'' is displayed.
+#' 
+#' @param x an output from function \code{mdn}
+#' @param \dots not used.
+#' @author Kai Wang \code{<kai-wang@@uiowa.edu>}
+#' @examples
+#' 
+#' data("jobs", package = "mediation")
+#' 
+#' fit.M <- lm(job_seek ~ treat + econ_hard + sex + age, data=jobs)
+#' fit.Y <- lm(depress2 ~ treat + job_seek + econ_hard + sex + age, data=jobs)
+#' mdn(fit.M, fit.Y, "treat")
+#' 
+#' @export print.mdn
+#' @S3method print mdn
 print.mdn = function (x, ...) 
 {
     cat("\nMediation Analysis via Likelihood \n\n")
