@@ -19,9 +19,10 @@
 #' range is between \code{-1} and \code{1}
 #' @return A list containing the following components: \item{M.model}{a data
 #' frame containing the results for the M-model } \item{Y.model}{a data frame
-#' containing the results for the Y-model }
+#' containing the results for the Y-model } \item{Variance.Matrixl}{a matrix of 
+#' variances and covariances of the parameters estimates }
 #' @author Kai Wang \code{<kai-wang@@uiowa.edu>}
-#' @references Wang, K. (2017) Identification and estimation in mediation
+#' @references Wang, K. (2018) Identification and estimation in mediation
 #' models with interaction in the presence of unobserved confounders.
 #' Submitted.
 #' @keywords estimates
@@ -41,49 +42,49 @@
 #' @export fimle.lnl
 #' @import stats
 fimle.lnl = function(fit.M, fit.Y, X, rho=0) {
-     M = all.vars(formula(fit.M))[1]
+     M.name = all.vars(formula(fit.M))[1]
      Y.factors = attr(terms(formula(fit.Y)), "term.labels")
      n = length(residuals(fit.M))
  
-     s1 = sigma(fit.M)
-     s2 = sigma(fit.Y)/sqrt(1-rho^2)              
-     tau = rho*s2/s1
+     s1.2 = mean(residuals(fit.M)^2)
+     s2.2 = mean(residuals(fit.Y)^2)/(1-rho^2)              
+     tau = rho*sqrt(s2.2/s1.2)
 
      M.c = coef(summary(fit.M))
      Y.c = coef(summary(fit.Y))
      for (var in row.names(M.c)){
         	Y.c[var,"Estimate"] = Y.c[var,"Estimate"] + M.c[var,"Estimate"]*tau
      }
-     Y.c[M,"Estimate"] = Y.c[M,"Estimate"] - tau
+     Y.c[M.name,"Estimate"] = Y.c[M.name,"Estimate"] - tau
      L1 = fit.M$model
      L1[,1] = 1
      names(L1)[1] = "(Intercept)"
      L2 = fit.Y$model
      L2[,1] = 1
      names(L2)[1] = "(Intercept)"
-     MMM = with(L2, get(M))
-     L2 = L2[, !(names(L2) %in% M)]
+     MMM = with(L2, get(M.name))
+     L2 = L2[, !(names(L2) %in% M.name)]
      L2$Mvar = MMM
-     names(L2)[names(L2) == "Mvar"] = M
-     if (paste(X, M, sep=":") %in% Y.factors){
- 	    L2$interaction = with(L2, get(X) * get(M))
- 	    names(L2)[names(L2) == "interaction"] = paste(X, M, sep=":")
+     names(L2)[names(L2) == "Mvar"] = M.name
+     if (paste(X, M.name, sep=":") %in% Y.factors){
+ 	    L2$interaction = with(L2, get(X) * get(M.name))
+ 	    names(L2)[names(L2) == "interaction"] = paste(X, M.name, sep=":")
      }
-     if (paste(M, X, sep=":") %in% Y.factors){ 
- 	    L2$interaction = with(L2, get(X) * get(M))
- 	    names(L2)[names(L2) == "interaction"] = paste(M, X, sep=":")
+     if (paste(M.name, X, sep=":") %in% Y.factors){ 
+ 	    L2$interaction = with(L2, get(X) * get(M.name))
+ 	    names(L2)[names(L2) == "interaction"] = paste(M.name, X, sep=":")
      }
  
      L1 = as.matrix(L1)
      L2 = as.matrix(L2)
 
-     A = rbind(cbind(1/s1^2*crossprod(L1), -rho/s1/s2*crossprod(L1, L2)), 
-               cbind(-rho/s1/s2*crossprod(L2, L1), 1/s2^2*crossprod(L2)))/(1-rho^2)
+     A = rbind(cbind(crossprod(L1)/s1.2, -rho/sqrt(s1.2*s2.2)*crossprod(L1, L2)), 
+               cbind(-rho/sqrt(s1.2*s2.2)*crossprod(L2, L1), crossprod(L2)/s2.2))/(1-rho^2)
      B = matrix(0, nrow = ncol(L1), ncol=2)
-     B2 = kronecker(matrix(c(-1/s1^2, 1/s2^2), ncol=2)*rho/2/(1-rho^2)/s1/s2, crossprod(L2, residuals(fit.M))) 
+     B2 = kronecker(matrix(c(-1/s1.2, 1/s2.2), ncol=2)*rho/2/(1-rho^2)/sqrt(s1.2*s2.2), crossprod(L2, residuals(fit.M))) 
      B = rbind(B, B2)
-     C = n/4/(1-rho^2)*matrix(c((2-rho^2)/s1^4, -rho^2/s1^2/s2^2, -rho^2/s1^2/s2^2, (2-rho^2)/s2^4), ncol=2)
- 
+     C = n/4/(1-rho^2)*matrix(c((2-rho^2)/s1.2^2, -rho^2/s1.2/s2.2, -rho^2/s1.2/s2.2, (2-rho^2)/s2.2^2), ncol=2)
+
      VC = solve(A - B %*% solve(C, t(B)))
      SEs = sqrt(diag(VC))
      M.SEs = SEs[1:nrow(M.c)]
@@ -100,5 +101,5 @@ fimle.lnl = function(fit.M, fit.Y, X, rho=0) {
      Y.c[, "t value"] = Y.c[,"Estimate"]/Y.c[,"Std. Error"]
      Y.c[, "Pr(>|t|)"] = signif(2*pnorm(abs(Y.c[,"t value"]), lower.tail=FALSE), 4)
  
-    list(M.model = as.data.frame(M.c), Y.model = as.data.frame(Y.c))
+    list(M.model = as.data.frame(M.c), Y.model = as.data.frame(Y.c), Variance.Matrix = VC)
  }

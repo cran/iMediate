@@ -50,7 +50,8 @@ pwr.mdn(a, b, c.p, 1-a^2, 1-c.p^2-b^2-2*a*b*c.p, alpha=0.05, n=200)
 
 }
 \references{
-Wang, K. (2017) Understanding power anomalies in mediation analysis. Revision submitted.
+Wang, K. (2018) Understanding power anomalies in mediation
+analysis. Psychometrika 83 (2), 387-406.
 }
 \author{
 Kai Wang \code{<kai-wang@uiowa.edu>}

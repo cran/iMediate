@@ -14,7 +14,8 @@
 #' @param alpha specified significance level 
 #' @return A \eqn{2\times 5} matrix
 #' @author Kai Wang \code{<kai-wang@@uiowa.edu>}
-#' @references Wang, K. (2017) Understanding power anomalies in mediation analysis. Revision submitted.
+#' @references Wang, K. (2018) Understanding power anomalies in mediation
+#' analysis. Psychometrika 83 (2), 387-406.
 #' @keywords power
 #' @examples
 #' 

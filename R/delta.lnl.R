@@ -39,8 +39,10 @@ delta.lnl = function(fit.M, fit.Y, rho=0) {
     Y.factors = attr(terms(formula(fit.Y)), "term.labels")
     n = length(residuals(fit.M))
 
-    s1 = sigma(fit.M)
-    s2.t = sigma(fit.Y)              # s.tilde
+s1 = sqrt(mean(residuals(fit.M)^2))
+s2.t = sqrt(mean(residuals(fit.Y)^2))
+#    s1 = sigma(fit.M)
+#    s2.t = sigma(fit.Y)              # s.tilde
     tau = rho/sqrt(1-rho^2)*s2.t/s1
 
     M.c = coef(summary(fit.M))

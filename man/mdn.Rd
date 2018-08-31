@@ -33,7 +33,8 @@ mediation analysis. The are five variables. They include estimates of
 various effects and lower and upper bounds of the boostrap confidence
 interval at level (1-\code{sig.level}) followed by test statistics and their
 respective p-values.  } \item{test}{a character string specifying the test
-statistic used for the mediated effect } \item{sig.level }{ a numerical
+statistic used for the mediated effect } \item{Test}{a numerical value of 0 or 1. 
+If the specified test statistic is significant, its value is 1; otherwise its value is 0 } \item{sig.level }{ a numerical
 variable specifying the significance level for the test of the mediated
 effect. } \item{Sample.size }{ number of subjects in the data } \item{B }{
 an integer specifying the number of replicates used for the bootstrapping }
@@ -65,8 +66,6 @@ applications. Birkh\"auser Boston, 225-237.
 
 Wang, K. (2017) An approximate uniformly more powerful test of mediated
 effect. Submitted.
-
-Wang, K. (2017) Mediation analysis via likelihood. Submitted.
 }
 \author{
 Kai Wang \code{<kai-wang@uiowa.edu>}

@@ -12,7 +12,7 @@ mediation analysis. It contains methods built upon likelihoods. Use
 }
 \details{
 \tabular{ll}{ Package: \tab iMediate\cr Type: \tab Package\cr Version: \tab
-0.4\cr Date: \tab 2017-09-02\cr License: \tab GPL (>=2)\cr LazyLoad: \tab
+0.5\cr Date: \tab 2018-08-29\cr License: \tab GPL (>=2)\cr LazyLoad: \tab
 yes\cr }
 }
 \examples{
@@ -20,16 +20,14 @@ yes\cr }
 data("jobs", package = "mediation")
 
 fit.M <- lm(job_seek ~ treat + econ_hard + sex + age, data=jobs)
-fit.Y <- lm(depress2 ~ treat + job_seek + econ_hard + sex + age, data=jobs)
+fit.Y <- lm(depress2 ~ treat * job_seek + econ_hard + sex + age, data=jobs)
 mdn(fit.M, fit.Y, "treat")
 
 }
 \references{
-Wang, K. (2017) Mediation analysis via likelihood. Submitted.
+Wang, K. (2018) Understanding power anomalies in mediation analysis. Psychometrika 83 (2), 387-406.
 
-Wang, K. (2017) Understanding power anomalies in mediation analysis. Revision submitted.
-
-Wang, K. (2017) Identification and estimation in mediation models with interaction in the presence of unobserved confounders. Submitted.
+Wang, K. (2018) Identification and maximum likelihood estimation in mediation models with treatment-mediator interaction and unobserved confounding. Submitted.
 }
 \author{
 Kai Wang \code{<kai-wang@uiowa.edu>}

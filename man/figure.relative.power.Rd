@@ -41,13 +41,13 @@ correct.
 }
 \examples{
 
-figure.relative.power()                                # Figure 2 of Wang (2017)
-figure.relative.power(comparison="mediated2direct")    # Figure 3 of Wang (2017)
+figure.relative.power()                                # Figure 2 of Wang (2018)
+figure.relative.power(comparison="mediated2direct")    # Figure 3 of Wang (2018)
 
 }
 \references{
-Wang, K. (2017) Understanding power anomalies in mediation
-analysis. Revision submitted.
+Wang, K. (2018) Understanding power anomalies in mediation
+analysis. Psychometrika 83 (2), 387-406.
 }
 \author{
 Kai Wang \code{<kai-wang@uiowa.edu>}

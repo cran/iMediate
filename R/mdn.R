@@ -27,7 +27,8 @@
 #' various effects and lower and upper bounds of the boostrap confidence
 #' interval at level (1-\code{sig.level}) followed by test statistics and their
 #' respective p-values.  } \item{test}{a character string specifying the test
-#' statistic used for the mediated effect } \item{sig.level }{ a numerical
+#' statistic used for the mediated effect } \item{Test}{a numerical value of 0 or 1. 
+#' If the specified test statistic is significant, its value is 1; otherwise its value is 0 } \item{sig.level }{ a numerical
 #' variable specifying the significance level for the test of the mediated
 #' effect. } \item{Sample.size }{ number of subjects in the data } \item{B }{
 #' an integer specifying the number of replicates used for the bootstrapping }
@@ -39,7 +40,6 @@
 #' Wang, K. (2017) An approximate uniformly more powerful test of mediated
 #' effect. Submitted.
 #' 
-#' Wang, K. (2017) Mediation analysis via likelihood. Submitted.
 #' @keywords mediation
 #' @examples
 #' 
@@ -66,19 +66,19 @@ mdn = function(fit.M, fit.Y, X, test="LR", sig.level=0.05, B=100) {
         l_a = 2*(logLik(tmp.M) - logLik(a0))    
         l_b.c = 2*(logLik(tmp.Y) - logLik(b0))
         l_c = 2*(logLik(b0) - logLik(b0c0)) 
-        mediated = min(l_a, l_b.c)
-        mediator = l_a + l_b.c
-        total = l_a+l_b.c+l_c
+        mediation = min(l_a, l_b.c)
+        full = mediation+l_c
         
-        c(l_a, l_b.c, max(l_a, l_b.c), mediated, mediator, l_c, total, mediated/mediator, mediated/total)
+        c(l_a, l_b.c, l_c, mediation, full, mediation/full)
     }
     
     obvd = mdn2(fit.M, fit.Y, X, boot=FALSE)
     l_a = obvd[1]
     l_b.c = obvd[2]
-    mediator = obvd[5]
-    predictor = obvd[6]
-    total = obvd[7]
+    sole = obvd[3]
+    mediation = obvd[4]
+    full = obvd[5]
+    prop = obvd[6]
 
     if(test == "S"){
     	    ra = coef(summary(fit.M))[X, "Estimate"]
@@ -91,27 +91,19 @@ mdn = function(fit.M, fit.Y, X, test="LR", sig.level=0.05, B=100) {
     }
     if(test != "S" & test != "LR") stop("Unknown test name")
 
-    if (B>0){
-    	    BS = matrix(0, nrow=B, ncol=7)
-    	    for (i in 1:B) BS[i,] = mdn2(fit.M, fit.Y, X)[-(1:2)]
-        BS[,1:5] = BS[,1:5]/nn
-        lower = apply(BS, 2, quantile, probs = sig.level/2)
-        upper = apply(BS, 2, quantile, probs = 1-sig.level/2)
+    if (B<10) stop("Not enough permutations")
+    BS = matrix(0, nrow=B, ncol=4)
+    for (i in 1:B) BS[i,] = mdn2(fit.M, fit.Y, X)[-(1:2)]
+    pvalue = c(mean(BS[,1] >= sole), mean(BS[,2] >= mediation), mean(BS[,3] >= full), mean(BS[,4] >= prop))
 
-        result = data.frame(Estimate = c(obvd[3:7]/nn, obvd[8:9]),
-                            Lower = lower,
-                            Upper = upper,
-                            Stat = c(obvd[3:7], NA, NA),
-                            P = c(NA, 1-Test, 1-pchisq(mediator, 2), 1-pchisq(predictor, 1), 1-pchisq(total, 3), NA, NA))
-    }
-    else {
-        result = data.frame(Estimate = c(obvd[3:7]/nn, obvd[8:9]),
-                            Stat = c(obvd[3:7], NA, NA),
-                            P = c(NA, 1-Test, 1-pchisq(mediator, 2), 1-pchisq(predictor, 1), 1-pchisq(total, 3), NA, NA))
-    }
-    dimnames(result)[[1]] = c("  Unmediated", "  Mediated", "Mediator", "Predictor", 
-                              "Total", "Mediated/Mediator", "Mediated/Total")
-    
-    structure(list(result=result, test=test, sig.level=sig.level, sample.size=nn, B=B), class = "mdn")
+    BS[,1:3] = BS[,1:3]/nn
+    lower = apply(BS, 2, quantile, probs = sig.level/2)
+    upper = apply(BS, 2, quantile, probs = 1-sig.level/2)
+
+    result = data.frame(Estimate = c(obvd[3:5]/nn, obvd[6]),
+                            Lower = lower, Upper = upper, pvalue = pvalue)
+    dimnames(result)[[1]] = c("Sole", "Mediation", "Full", "Prop. of Mediation")
+
+    structure(list(result=result, test=test, Test=Test, sig.level=sig.level, sample.size=nn, B=B), class = "mdn")
 }
 

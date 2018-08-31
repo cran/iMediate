@@ -24,7 +24,8 @@ range is between \code{-1} and \code{1}}
 \value{
 A list containing the following components: \item{M.model}{a data
 frame containing the results for the M-model } \item{Y.model}{a data frame
-containing the results for the Y-model }
+containing the results for the Y-model } \item{Variance.Matrixl}{a matrix of 
+variances and covariances of the parameters estimates }
 }
 \description{
 Parameter estimates in system of correlated linear M-model and linear
@@ -50,7 +51,7 @@ fimle.lnl(fit.M, fit.Y, "treat", rho=0.5)
 
 }
 \references{
-Wang, K. (2017) Identification and estimation in mediation
+Wang, K. (2018) Identification and estimation in mediation
 models with interaction in the presence of unobserved confounders.
 Submitted.
 }

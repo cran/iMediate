@@ -39,13 +39,13 @@ correct.
 }
 \examples{
 
-figure.joint.prob()                                # Figure 4 of Wang (2017)
-figure.joint.prob(prob="mediated.direct")          # Figure 5 of Wang (2017)
+figure.joint.prob()                                # Figure 4 of Wang (2018)
+figure.joint.prob(prob="mediated.direct")          # Figure 5 of Wang (2018)
 
 }
 \references{
-Wang, K. (2017) Understanding power anomalies in mediation
-analysis. Revision submitted.
+Wang, K. (2018) Understanding power anomalies in mediation
+analysis. Psychometrika 83 (2), 387-406.
 }
 \author{
 Kai Wang \code{<kai-wang@uiowa.edu>}

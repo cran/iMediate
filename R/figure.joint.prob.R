@@ -22,13 +22,13 @@
 #' @param grid.size grid size for \eqn{a^2} and \eqn{b^2}
 #' @return A plot generated using package \code{plotly}
 #' @author Kai Wang \code{<kai-wang@@uiowa.edu>}
-#' @references Wang, K. (2017) Understanding power anomalies in mediation
-#' analysis. Revision submitted.
+#' @references Wang, K. (2018) Understanding power anomalies in mediation
+#' analysis. Psychometrika 83 (2), 387-406.
 #' @keywords figure 
 #' @examples
 #' 
-#' figure.joint.prob()                                # Figure 4 of Wang (2017)
-#' figure.joint.prob(prob="mediated.direct")          # Figure 5 of Wang (2017)
+#' # figure.joint.prob()                                # Figure 4 of Wang (2018)
+#' # figure.joint.prob(prob="mediated.direct")          # Figure 5 of Wang (2018)
 #' 
 #' @export figure.joint.prob
 #' @importFrom mvtnorm pmvnorm
