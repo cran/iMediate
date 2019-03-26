@@ -22,7 +22,6 @@ The p-value for the mediated effect is displayed as greater or smaller than
 ``\code{> 0.05}'' is displayed.
 }
 \examples{
-
 data("jobs", package = "mediation")
 
 fit.M <- lm(job_seek ~ treat + econ_hard + sex + age, data=jobs)

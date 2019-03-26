@@ -18,7 +18,6 @@
 #' analysis. Psychometrika 83 (2), 387-406.
 #' @keywords power
 #' @examples
-#' 
 #' n = 100
 #' X = rnorm(n)
 #' s2X = mean((X-mean(X))^2)

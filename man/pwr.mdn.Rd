@@ -33,7 +33,6 @@ A \eqn{2\times 5} matrix
 This model is for the basic three-factor model. If coefficients are standardized, then \eqn{\tau_1=1-a^2} and \eqn{\tau_2=1-(c')^2-b^2-2abc'}.
 }
 \examples{
-
 n = 100
 X = rnorm(n)
 s2X = mean((X-mean(X))^2)

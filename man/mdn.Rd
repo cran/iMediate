@@ -4,7 +4,7 @@
 \alias{mdn}
 \title{Mediation Analysis via Likelihood}
 \usage{
-mdn(fit.M, fit.Y, X, test = "LR", sig.level = 0.05, B = 100)
+mdn(fit.M, fit.Y, X, sig.level = 0.05, B = 0)
 }
 \arguments{
 \item{fit.M}{a fitted model object for mediator. It is an object from which
@@ -16,15 +16,12 @@ different from the model for the mediator}
 
 \item{X}{a character string of the name of the treatment variable.}
 
-\item{test}{a character string specifying the test statistic used for the
-mediated effect. It can be either ``\code{S}'' for the S test proposed in
-Berger (1996) or ``\code{LR}'' for the LR test discussed in Wang (2017).}
-
 \item{sig.level}{a numerical variable specifying the significance level for
 the test of the mediated effect.}
 
-\item{B}{an integer specifying the number of replicates used for the
-bootstrapping}
+\item{B}{an integer specifying the number of replicates used in the
+bootstrapping method for the confidence interval. Default value is 0 and 
+bootstrapping is not conducted}
 }
 \value{
 A list with class ``\code{mdn}'' containing the following
@@ -50,22 +47,19 @@ whether it is larger or smaller than \code{sig.level}. If it is larger, a 1
 is reported; otherwise a 0 is reported. There is no p-value.
 }
 \examples{
-
 data("jobs", package = "mediation")
 
 fit.M <- lm(job_seek ~ treat + econ_hard + sex + age, data=jobs)
 fit.Y <- lm(depress2 ~ treat + job_seek + econ_hard + sex + age, data=jobs)
 mdn(fit.M, fit.Y, "treat")
-
-
+mdn(fit.M, fit.Y, "treat", B=100)
 }
 \references{
 Berger, R.L. (1997) Likelihood ratio tests and
 intersection-union tests. Advances in statistical decision theory and
 applications. Birkh\"auser Boston, 225-237.
 
-Wang, K. (2017) An approximate uniformly more powerful test of mediated
-effect. Submitted.
+Wang, K. (2019) Likelihood-based analysis of the statistical effects of a treatment on an outcome. Submitted.
 }
 \author{
 Kai Wang \code{<kai-wang@uiowa.edu>}

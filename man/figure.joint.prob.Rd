@@ -38,9 +38,8 @@ labels from R function \code{plot_ly} are switched in order to make them
 correct.
 }
 \examples{
-
-figure.joint.prob()                                # Figure 4 of Wang (2018)
-figure.joint.prob(prob="mediated.direct")          # Figure 5 of Wang (2018)
+## figure.joint.prob()                                # Figure 4 of Wang (2018)
+## figure.joint.prob(prob="mediated.direct")          # Figure 5 of Wang (2018)
 
 }
 \references{

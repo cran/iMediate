@@ -26,9 +26,8 @@
 #' analysis. Psychometrika 83 (2), 387-406.
 #' @keywords figure 
 #' @examples
-#' 
-#' # figure.joint.prob()                                # Figure 4 of Wang (2018)
-#' # figure.joint.prob(prob="mediated.direct")          # Figure 5 of Wang (2018)
+#' ## figure.joint.prob()                                # Figure 4 of Wang (2018)
+#' ## figure.joint.prob(prob="mediated.direct")          # Figure 5 of Wang (2018)
 #' 
 #' @export figure.joint.prob
 #' @importFrom mvtnorm pmvnorm

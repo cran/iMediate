@@ -14,13 +14,11 @@
 #' @param fit.Y a fitted model object for outcome. It can be of a class
 #' different from the model for the mediator
 #' @param X a character string of the name of the treatment variable.
-#' @param test a character string specifying the test statistic used for the
-#' mediated effect. It can be either ``\code{S}'' for the S test proposed in
-#' Berger (1996) or ``\code{LR}'' for the LR test discussed in Wang (2017).
 #' @param sig.level a numerical variable specifying the significance level for
 #' the test of the mediated effect.
-#' @param B an integer specifying the number of replicates used for the
-#' bootstrapping
+#' @param B an integer specifying the number of replicates used in the
+#' bootstrapping method for the confidence interval. Default value is 0 and 
+#' bootstrapping is not conducted
 #' @return A list with class ``\code{mdn}'' containing the following
 #' components: \item{result}{a data frame containing the results of the
 #' mediation analysis. The are five variables. They include estimates of
@@ -37,73 +35,158 @@
 #' intersection-union tests. Advances in statistical decision theory and
 #' applications. Birkh\"auser Boston, 225-237.
 #' 
-#' Wang, K. (2017) An approximate uniformly more powerful test of mediated
-#' effect. Submitted.
+#' Wang, K. (2019) Likelihood-based analysis of the statistical effects of a treatment on an outcome. Submitted.
 #' 
 #' @keywords mediation
 #' @examples
-#' 
 #' data("jobs", package = "mediation")
 #' 
 #' fit.M <- lm(job_seek ~ treat + econ_hard + sex + age, data=jobs)
 #' fit.Y <- lm(depress2 ~ treat + job_seek + econ_hard + sex + age, data=jobs)
 #' mdn(fit.M, fit.Y, "treat")
-#' 
-#' 
+#' mdn(fit.M, fit.Y, "treat", B=100)
+#‘ 
 #' @export mdn
-mdn = function(fit.M, fit.Y, X, test="LR", sig.level=0.05, B=100) {
+#' @import MBESS
+mdn = function(fit.M, fit.Y, X, sig.level=0.05, B=0) {
+	options(warn=-1)
+
     M = all.vars(formula(fit.M))[1]
     nn = length(resid(fit.M))
         
-    mdn2 = function(fit.M, fit.Y, X, boot=TRUE){
-    	    if(boot) idx = sample(1:nn, replace=TRUE) else idx=1:nn
-    	    tmp.M = update(fit.M, data=fit.M$model[idx,])
-	    tmp.Y = update(fit.Y, data=fit.Y$model[idx,])
+    mdn2 = function(fit.M, fit.Y, X, idx=1:nn){
+    		tmp.M = update(fit.M, data=fit.M$model[idx,])
+	    	tmp.Y = update(fit.Y, data=fit.Y$model[idx,])
+
         a0 = update(tmp.M, as.formula(paste(".~. - ", X)))                   # no X effect
-        b0 = update(tmp.Y, as.formula(paste(".~. - ", M)))                   # no M effect
-        b0c0 = update(tmp.Y, as.formula(paste(".~. - ", M, "-", X)))         # no M and X effect
+        	b0 = update(tmp.Y, as.formula(paste(".~. - ", M)))                   # no M effect
+        	c0 = update(tmp.Y, as.formula(paste(".~. - ", X)))                   # no X effect
+        	b0c0 = update(tmp.Y, as.formula(paste(".~. - ", M, "-", X)))         # no M and X effect
 
-        l_a = 2*(logLik(tmp.M) - logLik(a0))    
-        l_b.c = 2*(logLik(tmp.Y) - logLik(b0))
-        l_c = 2*(logLik(b0) - logLik(b0c0)) 
-        mediation = min(l_a, l_b.c)
-        full = mediation+l_c
-        
-        c(l_a, l_b.c, l_c, mediation, full, mediation/full)
+        	l_a = 2*(logLik(tmp.M) - logLik(a0))    
+        	l_b = 2*(logLik(tmp.Y) - logLik(b0))
+        	l_bc0 = 2*(logLik(c0) - logLik(b0c0))
+        	l_c = 2*(logLik(tmp.Y) - logLik(c0)) 
+
+        	
+       	c(l_a, l_b, l_bc0, l_c)
     }
+
+    LRTs = function(ls) {
+    		l_ab = min(ls[1:2])
+    		CIE = min(ls[1], ls[3])
+    		l_abc = CIE + ls[4]
+    		
+		c(l_ab, l_abc-l_ab, l_abc, ls[4], CIE)
+    }
+
+	NCPs = function(ls) {
+		
+		ncp = function(stat)
+		    ifelse (stat > 10, stat, optimize(function(x) -dchisq(stat, 1, ncp=x), c(0, 200), tol=10^(-6))$minimum)
+
+        ncp_ab = min(ncp(ls[1]), ncp(ls[2]))
+        ncp_abc0 = min(ncp(ls[1]), ncp(ls[3]))
+        ncp_c = ncp(ls[4])
+        ncp_abc = ncp_abc0 + ncp_c
+
+		c(ncp_ab, ncp_abc-ncp_ab, ncp_abc, ncp_c, ncp_abc0, ncp_ab/ncp_abc, ncp_c/ncp_abc)
+	}
+
+	CI = function(stat, df=1, sig.level=0.05){
+#			if (1-pchisq(stat, df=df) > sig.level/2) lb2 = 0 else lb2 = lochi(stat, df, 1-sig.level)[1]
+#			if (pchisq(stat, df=df) < sig.level/2) ub2 = 0 else ub2 = hichi(stat, df, 1-sig.level)[1]
+#
+#			if (1 - pchisq(stat, df=df) > sig.level) {
+#				lb1 = 0 
+#				sig = FALSE
+#				}
+#				else {
+#					lb1 = lochi(stat, df, 1-sig.level*2)[1]
+#					sig = TRUE
+#				}
+#		
+#		c(lb2, ub2, lb1, sig)
+#
+            two.sd = conf.limits.nc.chisq(stat, conf.level=1-sig.level, df=df)
+            one.sd = conf.limits.nc.chisq(stat, conf.level=1-sig.level*2, df=df)
+			sig = (1 - pchisq(stat, df=df) < sig.level)
+		
+		c(two.sd$Lower.Limit, two.sd$Upper.Limit, one.sd$Lower.Limit, sig)
+	}
+
+
+	CI.iut = function(stat1, stat2, df=1, sig.level=0.05, max.bound=500){
+#	    lb.one.sided = function(sig.level=sig.level){
+#			if (1-pchisq(stat1, df=df) > sig.level) cc1 = 0 else cc1 = lochi(stat1, df, 1-sig.level*2)[1]
+#			if (1-pchisq(stat2, df=df) > sig.level) cc2 = 0 else cc2 = lochi(stat2, df, 1-sig.level*2)[1]
+#
+#           cc1 = conf.limits.nc.chisq(stat1, conf.level=1-sig.level*2, df=df)$Lower.Limit
+#           cc2 = conf.limits.nc.chisq(stat2, conf.level=1-sig.level*2, df=df)$Lower.Limit
+#
+#		min(cc1, cc2)
+#   		}
     
-    obvd = mdn2(fit.M, fit.Y, X, boot=FALSE)
-    l_a = obvd[1]
-    l_b.c = obvd[2]
-    sole = obvd[3]
-    mediation = obvd[4]
-    full = obvd[5]
-    prop = obvd[6]
+	    lb1 = min(conf.limits.nc.chisq(stat1, alpha.lower=sig.level, alpha.upper=0, conf.level=NULL, df=df)$Lower.Limit,
+                  conf.limits.nc.chisq(stat2, alpha.lower=sig.level, alpha.upper=0, conf.level=NULL, df=df)$Lower.Limit)
+	    sig = TRUE
+    		if (pchisq(stat1, df=df) < 1-sig.level | pchisq(stat2, df=df) < 1-sig.level) {
+    			lb1 = 0
+    			sig = FALSE
+	    		}
 
-    if(test == "S"){
-    	    ra = coef(summary(fit.M))[X, "Estimate"]
-	    rb = coef(summary(fit.Y))[M, "Estimate"]
-	    Test =  S.test(1-pnorm(sign(ra)*sqrt(l_a)), 1-pnorm(sign(rb)*sqrt(l_b.c)), sig.level) 
-    }
-    if(test == "LR"){
-        c.value = qchisq(1 - sig.level, 1)
-	    Test = (l_a >= c.value) & (l_b.c >= c.value)
-    }
-    if(test != "S" & test != "LR") stop("Unknown test name")
+        cc1 = conf.limits.nc.chisq(stat1, conf.level=1-sig.level, df=df)
+        cc2 = conf.limits.nc.chisq(stat2, conf.level=1-sig.level, df=df)
+    		lb2 = min(cc1$Lower.Limit, cc2$Lower.Limit)
+		ub2 = max(cc1$Upper.Limit, cc2$Upper.Limit)
+    		
+#		if (pchisq(stat1, df=df) < sig.level) cc1 = 0 else cc1 = hichi(stat1, df, 1-sig.level*2)[1]
+#		if (pchisq(stat2, df=df) < sig.level) cc2 = 0 else cc2 = hichi(stat2, df, 1-sig.level*2)[1]
+#   		ub2 = max(cc1, cc2)
 
-    if (B<10) stop("Not enough permutations")
-    BS = matrix(0, nrow=B, ncol=4)
-    for (i in 1:B) BS[i,] = mdn2(fit.M, fit.Y, X)[-(1:2)]
-    pvalue = c(mean(BS[,1] >= sole), mean(BS[,2] >= mediation), mean(BS[,3] >= full), mean(BS[,4] >= prop))
+		c(lb2, ub2, lb1, sig)
+	}
 
-    BS[,1:3] = BS[,1:3]/nn
-    lower = apply(BS, 2, quantile, probs = sig.level/2)
-    upper = apply(BS, 2, quantile, probs = 1-sig.level/2)
+    obvd = mdn2(fit.M, fit.Y, X)
+    result = data.frame(LRT = c(LRTs(obvd), NA, NA), NCP = NCPs(obvd))
+    CIs = rbind(CI.iut(obvd[1], obvd[2], sig.level=sig.level),
+                rep(NA, 4),
+				CI.iut(obvd[1]+obvd[4], obvd[3]+obvd[4], df=2, sig.level=sig.level),
+				CI(obvd[4], sig.level=sig.level),
+				CI.iut(obvd[1], obvd[3], sig.level=sig.level),
+				rep(NA, 4),
+				rep(NA, 4)
+				)
+	result = cbind(result, CIs)
+    dimnames(result)[[1]] = c("       Indirect", "   Complete Direct", "Total", "       Direct", "   Complete Indirect ", "Prop. IE", "Prop. DE")
+    dimnames(result)[[2]] = c("LRT", "NCP", "LB2", "UB2", "LB1", paste("p <", sig.level))
 
-    result = data.frame(Estimate = c(obvd[3:5]/nn, obvd[6]),
-                            Lower = lower, Upper = upper, pvalue = pvalue)
-    dimnames(result)[[1]] = c("Sole", "Mediation", "Full", "Prop. of Mediation")
 
-    structure(list(result=result, test=test, Test=Test, sig.level=sig.level, sample.size=nn, B=B), class = "mdn")
+	if(B > 0) {
+     	BS = pvalue = matrix(0, nrow=B, ncol=7)
+    	    for (i in 1:B){
+      			idx = sample(1:nn, replace=TRUE)
+    		    tmp = mdn2(fit.M, fit.Y, X, idx=idx)
+    		    BS[i,] = NCPs(tmp)
+    		    pvalue[i,] = c(pchisq(tmp[1], 1) > 1-sig.level & pchisq(tmp[2], 1) > 1-sig.level,
+    		                   NA,
+    		                   pchisq(tmp[1]+tmp[4], 2) > 1-sig.level & pchisq(tmp[3]+tmp[4], 2) > 1-sig.level,
+				           pchisq(tmp[4], 1) > 1-sig.level,
+				       	   pchisq(tmp[1], 1) > 1-sig.level & pchisq(tmp[3], 1) > 1-sig.level,
+                           NA, NA)
+    	    	}
+    	    	
+    		lb2 = apply(BS, 2, quantile, probs = sig.level/2)
+        ub2 = apply(BS, 2, quantile, probs = 1-sig.level/2)
+        lb1 = apply(BS, 2, quantile, probs = sig.level)
+     
+      	result[,3:5] = cbind(lb2, ub2, lb1)
+     	result[,6] = colMeans(pvalue)
+     	names(result)[6] = "p value"
 }
+    	options(warn=0)
+    	
+    structure(list(result=result, sig.level=sig.level, sample.size=nn, B=B), class = "mdn")
+}
+
 

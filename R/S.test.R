@@ -14,7 +14,6 @@
 #' intersection-union tests. Advances in statistical decision theory and
 #' applications. Birkh\"auser Boston, 225-237.
 #' @examples
-#' 
 #' S.test(0.1, 0.4, 0.05)
 #' 
 #' @export S.test

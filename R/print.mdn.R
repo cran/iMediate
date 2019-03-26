@@ -12,7 +12,6 @@
 #' @param \dots not used.
 #' @author Kai Wang \code{<kai-wang@@uiowa.edu>}
 #' @examples
-#' 
 #' data("jobs", package = "mediation")
 #' 
 #' fit.M <- lm(job_seek ~ treat + econ_hard + sex + age, data=jobs)
@@ -24,17 +23,22 @@ print.mdn = function (x, ...)
 {
     cat("\nMediation Analysis via Likelihood \n\n")
     tmp = x$result
-    tmp$Estimate = round(tmp$Estimate, 4)
-    	tmp$Lower = round(tmp$Lower, 4)
-    tmp$Upper = round(tmp$Upper, 4)
-    tmp$pvalue = round(tmp$pvalue, 4)
+#    tmp$Estimate = round(tmp$Estimate, 4)
+#    	tmp$Lower = round(tmp$Lower, 4)
+#    tmp$Upper = round(tmp$Upper, 4)
+#    tmp$pvalue = round(tmp$pvalue, 4)
+#
+#    cf = paste(100*(1-x$sig.level), "%", sep="")
+#    names(tmp)[2:3] = c(paste("LB", cf, "CI"), paste("UB", cf, "CI"))
+    tmp2 = round(tmp, 4)
+    if (names(tmp2)[6] == "p < 0.05"){
+    	tmp2[,6] = ifelse(tmp2[,6] < 0.5, FALSE, TRUE)
+    }
+    tmp2[is.na(tmp2)] = "."
 
-    cf = paste(100*(1-x$sig.level), "%", sep="")
-    names(tmp)[2:3] = c(paste("LB", cf, "CI"), paste("UB", cf, "CI"))
-
-    print(tmp)
-    cat(paste("\n", x$sample.size, " subjects", sep=""))
-    if (x$B>0) cat(paste("\n", x$B, " bootstrap samples for confidence intervals", sep=""))
-    cat("\nThe", x$test, "test for mediation effect is", ifelse(x$Test > 0.5, "significant", "non-significant"), "at level", x$sig.level)
-    cat("\nUpper bound for the proportion of mediation is 1\n\n")
+    print(tmp2)
+    cat(paste("\nThere are ", x$sample.size, " subjects", sep=""))
+    cat(paste("\nThe confidence level is", 1-x$sig.level))
+    if (x$B > 0) cat(paste("\n", x$B, " bootstrap samples are used for confidence intervals", sep=""))
+    cat("\n\n")
 }

@@ -28,9 +28,8 @@
 #' analysis. Psychometrika 83 (2), 387-406.
 #' @keywords figure
 #' @examples
-#' 
-#' # figure.relative.power()                                # Figure 2 of Wang (2018)
-#' # figure.relative.power(comparison="mediated2direct")    # Figure 3 of Wang (2018)
+#' ## figure.relative.power()                                # Figure 2 of Wang (2018)
+#' ## figure.relative.power(comparison="mediated2direct")    # Figure 3 of Wang (2018)
 #' 
 #' @export figure.relative.power
 #' @importFrom mvtnorm pmvnorm

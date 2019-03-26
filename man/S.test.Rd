@@ -22,7 +22,6 @@ returned; otherwise a 0 is returned.
 \code{S.test} conducts the S test proposed in Berger (1996)
 }
 \examples{
-
 S.test(0.1, 0.4, 0.05)
 
 }
